@@ -1,0 +1,5 @@
+Requirement R001:
+The macro shall derive treatment-emergent adverse event flag
+TRTEMFL = 'Y' when AE start date is greater than or equal to
+first dose date and less than or equal to last dose date.
+If AE start date is before first dose date, TRTEMFL should be 'N'.

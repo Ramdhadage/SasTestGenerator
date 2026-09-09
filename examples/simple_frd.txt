@@ -1,0 +1,4 @@
+Functional Requirement Document: Visit Flag
+
+Requirement ID: FRD-001
+If VISIT is equal to "BASELINE", derive BASEFL as "Y"; otherwise derive BASEFL as "N".

@@ -1,0 +1,17 @@
+Functional Requirement Document: Toxicity Flag Derivation
+
+Requirement ID: FRD-001
+If PARAM is equal to ALT and VALUE is greater than 3 times ULN,
+derive TOXFL as Y.
+
+Requirement ID: FRD-002
+If PARAM is not ALT, derive TOXFL as N.
+
+Requirement ID: FRD-003
+If VALUE is equal to or less than 3 times ULN, derive TOXFL as N.
+
+Requirement ID: FRD-004
+If PARAM, VALUE, or ULN is missing, derive TOXFL as N.
+
+Requirement ID: FRD-005
+The output dataset must retain USUBJID, PARAM, VALUE, and ULN.
