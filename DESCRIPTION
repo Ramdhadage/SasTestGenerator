@@ -1,0 +1,22 @@
+Package: sastestgenerator
+Title: Generate SAS Macro Test Cases from Functional Requirements
+Version: 0.0.1
+Authors@R: person("Ramnath", "Dhadage", email = "", role = c("aut", "cre"))
+Description: Provides a small proof-of-concept workflow for reading SAS macro
+    code and functional requirements, constructing an LLM prompt, and returning
+    structured SAS test-generation results.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    bslib,
+    checkmate,
+    cli,
+    ellmer,
+    jsonlite,
+    pkgload,
+    shiny,
+    shinyFeedback,
+    waiter,
+    writexl
