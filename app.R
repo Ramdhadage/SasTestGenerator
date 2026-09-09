@@ -62,9 +62,6 @@ ui <- bslib::page_sidebar(
       fileInput(
         "sas_file", "Upload a SAS macro", accept = ".sas", multiple = FALSE
       ),
-      checkboxInput(
-        "include_sas", "Include generated SAS program in downloads", TRUE
-      ),
       bslib::input_task_button(
         "generate", "Generate test cases", label_busy = "Generating..."
       ),
@@ -76,11 +73,8 @@ ui <- bslib::page_sidebar(
     bslib::card_header("Generated validation matrix"),
     uiOutput("result_status"),
     tableOutput("test_matrix"),
-    bslib::layout_columns(
-      downloadButton("download_xlsx", "Download XLSX"),
-      downloadButton("download_sas", "Download SAS ZIP"),
-      col_widths = c(4, 4, 4)
-    )
+      downloadButton("download_results", "Download results")
+     
   )
 )
 
@@ -187,49 +181,72 @@ server <- function(input, output, session) {
     ))
     result$matrix
   }, striped = TRUE, bordered = TRUE, hover = TRUE, na = "")
-
-  output$download_xlsx <- downloadHandler(
-    filename = function() "Validation_Test_Matrix.xlsx",
+  output$download_results <- downloadHandler(
+    filename = function() "Validation_Results.zip",
     content = function(file) {
       result <- require_generated_result(generated())
+
+      temp_dir <- tempfile("validation_results_")
+      dir.create(temp_dir)
+      on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
+
+      excel_path <- file.path(temp_dir, "Validation_Test_Matrix.xlsx")
       writexl::write_xlsx(
         list(
           Validation_Matrix = result$matrix,
           Sample_Data = result$sample_data
         ),
-        path = file
+        path = excel_path
+      )
+
+      sas_code_path <- file.path(temp_dir, "sas_code.sas")
+      sas_test_code_path <- file.path(temp_dir, "sas_test_code.sas")
+
+      writeLines(result$sas_code, sas_code_path, useBytes = TRUE)
+      writeLines(result$sas_test_code, sas_test_code_path, useBytes = TRUE)
+
+      utils::zip(
+        zipfile = file,
+        files = c(excel_path, sas_code_path, sas_test_code_path),
+        flags = "-j"
       )
     }
   )
+  # output$download_xlsx <- downloadHandler(
+  #   filename = function() "Validation_Test_Matrix.xlsx",
+  #   content = function(file) {
+  #     result <- require_generated_result(generated())
+  #     writexl::write_xlsx(
+  #       list(
+  #         Validation_Matrix = result$matrix,
+  #         Sample_Data = result$sample_data
+  #       ),
+  #       path = file
+  #     )
+  #   }
+  # )
 
-  output$download_sas <- downloadHandler(
-    filename = function() "SAS_Test_Programs.zip",
-    content = function(file) {
-      result <- require_generated_result(generated())
-      if (!isTRUE(input$include_sas)) {
-        shiny::showNotification(
-            "Enable the SAS program download before downloading the ZIP.",
-            type = "error",
-            duration = 5
-          )
-      }
-    sas_dir <- tempfile("sas_exports_")
-    dir.create(sas_dir)
-    on.exit(unlink(sas_dir, recursive = TRUE, force = TRUE), add = TRUE)
+  # output$download_sas <- downloadHandler(
+  #   filename = function() "SAS_Test_Programs.zip",
+  #   content = function(file) {
+  #     result <- require_generated_result(generated())
+  #   sas_dir <- tempfile("sas_exports_")
+  #   dir.create(sas_dir)
+  #   on.exit(unlink(sas_dir, recursive = TRUE, force = TRUE), add = TRUE)
 
-    sas_code_path <- file.path(sas_dir, "sas_code.sas")
-    sas_test_code_path <- file.path(sas_dir, "sas_test_code.sas")
+  #   sas_code_path <- file.path(sas_dir, "sas_code.sas")
+  #   sas_test_code_path <- file.path(sas_dir, "sas_test_code.sas")
 
-    writeLines(result$sas_code, sas_code_path, useBytes = TRUE)
-    writeLines(result$sas_test_code, sas_test_code_path, useBytes = TRUE)
+  #   writeLines(result$sas_code, sas_code_path, useBytes = TRUE)
+  #   writeLines(result$sas_test_code, sas_test_code_path, useBytes = TRUE)
 
-    utils::zip(
-      zipfile = file,
-      files = c(sas_code_path, sas_test_code_path),
-      flags = "-j"
-    )
-    }
-  )
+  #   utils::zip(
+  #     zipfile = file,
+  #     files = c(sas_code_path, sas_test_code_path),
+  #     flags = "-j"
+  #   )
+  #   }
+  # )
 }
 
 validate_app_inputs <- function(input) {
