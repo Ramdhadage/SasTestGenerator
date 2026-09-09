@@ -8,8 +8,11 @@ plan.md
 Prompt with details.md
 README.md
 example.R
-AGENTS.R
+AGENTS.md
 .Renviron
 rsconnect/
 temp/
 .vscode/
+app_dinesh.R
+NEWS.md
+sastestgenerator.Rproj
