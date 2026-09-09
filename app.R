@@ -138,7 +138,7 @@ server <- function(input, output, session) {
               0.25,
               detail = "Requesting structured test cases from OpenRouter"
             )
-            response <- sastestgenerator::generate_sas_tests_openrouter(
+            response <- generate_sas_tests_openrouter(
               frd = frd,
               macro = macro,
               model = input$model,
@@ -215,11 +215,15 @@ server <- function(input, output, session) {
     filename = function() "SAS_Test_Programs.zip",
     content = function(file) {
       result <- require_generated_result(generated())
-      if (!isTRUE(input$include_sas)) {
-        stop("Enable the SAS program download before downloading the ZIP.")
+      if (!isTRUE(input$sas_test_code)) {
+        shiny::showNotification(
+            "Enable the SAS program download before downloading the ZIP.",
+            type = "error",
+            duration = 5
+          )
       }
       sas_path <- tempfile(fileext = ".sas")
-      writeLines(result$sas_code, sas_path, useBytes = TRUE)
+      writeLines(result$sas_test_code, sas_path, useBytes = TRUE)
       utils::zip(file, sas_path, flags = "-j")
     }
   )
@@ -278,6 +282,7 @@ normalize_generated_result <- function(response) {
     matrix = normalize_test_cases(parsed$test_cases, parsed$traceability),
     sample_data = normalize_sample_data(parsed$sample_data),
     sas_code = normalize_sas_code(parsed$sas_code),
+    sas_test_code = normalize_sas_code(parsed$sas_test_code),
     raw_response = response$response
   )
 }

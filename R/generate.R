@@ -60,9 +60,9 @@ generate_sas_tests_openrouter <- function(
   chat <- ellmer::chat_openrouter(
     system_prompt = paste(
       "Return only valid JSON. Do not wrap the JSON in Markdown fences.",
-      "The top-level object must contain test_cases, sample_data, sas_code,",
+      "The top-level object must contain test_cases, sample_data, sas_code,  sas_test_code",
       "and traceability. Every test_cases item must contain exactly these keys:",
-      "Test_ID, Requirement_ID, Test_Type, Test_Scenario, Expected_Result.",
+      "Test_ID, Requirement_ID, Test_Type, Test_Scenario, Input, Expected_Result.",
       "Use the exact underscore spelling shown; do not use spaces or hyphens",
       "in these keys. Requirement_ID must use the FRD requirement identifier",
       "(for example FRD-001), and Test_Type must describe the test category."
@@ -101,8 +101,9 @@ validate_generation_inputs <- function(frd, macro) {
 
 build_generation_prompt <- function(frd_text, macro_source) {
   paste(
+    
     "You are a Senior SAS Programmer and Clinical Programming Validation Expert.",
-    "Generate structured JSON containing test cases, sample data, SAS test code,",
+    "Generate structured JSON containing test cases, sample data, SAS validation/test code,",
     "and traceability for the supplied functional requirements and SAS macro.",
     "Functional requirements:",
     frd_text,
