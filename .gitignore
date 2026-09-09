@@ -1,0 +1,15 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+/.quarto/
+examples/
+plan.md
+Prompt with details.md
+README.md
+example.R
+AGENTS.R
+.Renviron
+rsconnect/
+temp/
+.vscode/
