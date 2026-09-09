@@ -77,7 +77,6 @@ ui <- bslib::page_sidebar(
     uiOutput("result_status"),
     tableOutput("test_matrix"),
     bslib::layout_columns(
-      downloadButton("download_matrix", "Download CSV"),
       downloadButton("download_xlsx", "Download XLSX"),
       downloadButton("download_sas", "Download SAS ZIP"),
       col_widths = c(4, 4, 4)
@@ -189,14 +188,6 @@ server <- function(input, output, session) {
     result$matrix
   }, striped = TRUE, bordered = TRUE, hover = TRUE, na = "")
 
-  output$download_matrix <- downloadHandler(
-    filename = function() "Validation_Test_Matrix.csv",
-    content = function(file) {
-      result <- require_generated_result(generated())
-      utils::write.csv(result$matrix, file, row.names = FALSE, na = "")
-    }
-  )
-
   output$download_xlsx <- downloadHandler(
     filename = function() "Validation_Test_Matrix.xlsx",
     content = function(file) {
@@ -215,16 +206,28 @@ server <- function(input, output, session) {
     filename = function() "SAS_Test_Programs.zip",
     content = function(file) {
       result <- require_generated_result(generated())
-      if (!isTRUE(input$sas_test_code)) {
+      if (!isTRUE(input$include_sas)) {
         shiny::showNotification(
             "Enable the SAS program download before downloading the ZIP.",
             type = "error",
             duration = 5
           )
       }
-      sas_path <- tempfile(fileext = ".sas")
-      writeLines(result$sas_test_code, sas_path, useBytes = TRUE)
-      utils::zip(file, sas_path, flags = "-j")
+    sas_dir <- tempfile("sas_exports_")
+    dir.create(sas_dir)
+    on.exit(unlink(sas_dir, recursive = TRUE, force = TRUE), add = TRUE)
+
+    sas_code_path <- file.path(sas_dir, "sas_code.sas")
+    sas_test_code_path <- file.path(sas_dir, "sas_test_code.sas")
+
+    writeLines(result$sas_code, sas_code_path, useBytes = TRUE)
+    writeLines(result$sas_test_code, sas_test_code_path, useBytes = TRUE)
+
+    utils::zip(
+      zipfile = file,
+      files = c(sas_code_path, sas_test_code_path),
+      flags = "-j"
+    )
     }
   )
 }
