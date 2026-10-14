@@ -1,0 +1,126 @@
+# sastestgenerator
+
+An R package and Shiny proof of concept for drafting SAS macro test
+cases from functional requirements documents (FRDs) and SAS source.
+Statistical programmers can prepare a prompt offline or request a
+validation matrix, sample data, and SAS programs through OpenRouter.
+
+Generated content requires independent review. The application does not
+execute SAS, establish test coverage, or enforce an approval workflow.
+
+## Get started
+
+Clone this repository and open its root in RStudio. The lockfile records
+R 4.6.0. Restore the runtime and documentation dependencies, then load
+the package:
+
+``` r
+
+renv::restore()
+pkgload::load_all(".")
+```
+
+Run the supplied synthetic example without an API key or network call:
+
+``` r
+
+frd <- read_frd("examples/simple_frd.txt")
+macro <- import_sas_macro("examples/simple_visit_flag.sas")
+result <- generate_sas_tests(frd, macro)
+cat(result$prompt)
+```
+
+[`generate_sas_tests()`](https://ramdhadage.github.io/SasTestGenerator/reference/generate_sas_tests.md)
+prepares a prompt; its default test-case and SAS-code fields are empty.
+`source("example.R")` runs this workflow with small assertions.
+
+## Use the Shiny app
+
+For live generation, add your key to the project `.Renviron`, then
+restart R:
+
+``` text
+OPENROUTER_API_KEY=your-key-here
+```
+
+``` r
+
+shiny::runApp(".")
+```
+
+Paste the FRD, upload one `.sas` file, check the generation settings,
+and select **Generate test cases**. The app displays six matrix columns
+and downloads `Validation_Results.zip` containing:
+
+- `Validation_Test_Matrix.xlsx`, with `Validation_Matrix` and
+  `Sample_Data` sheets;
+- `sas_code.sas`;
+- `sas_test_code.sas`.
+
+The app’s model setting and package default are currently `gpt-4o-mini`,
+with temperature `0` and a maximum of `4096` output tokens. Confirm that
+your selected model identifier is accepted by OpenRouter. Live requests
+may incur provider charges. The app can open without a key; generation
+requires one.
+
+## Data and implementation boundaries
+
+Live generation sends the complete FRD text and SAS source to OpenRouter
+and its selected model provider. Use public or synthetic examples and
+only other content approved for those services. The app does not
+classify, redact, or de-identify inputs. Keep credentials and
+confidential content out of source control.
+
+The package reads `.txt`, `.md`, `.markdown`, and `.sas` FRDs. The UI
+accepts pasted FRD text. PDF/DOCX parsing and SAS execution are outside
+the current scope. Macro metadata uses regular expressions rather than a
+complete SAS parser. Successful JSON parsing and matrix display do not
+establish SAS correctness or requirement coverage. Exports do not retain
+the original inputs, prompt, model settings, or raw response as a
+reproducibility record.
+
+## Documentation and development
+
+The website navigation provides **Get started**, **Reference**,
+**Articles**, and **Changelog**. The corresponding sources in this
+checkout are:
+
+- Getting started (`vignettes/sastestgenerator.Rmd`): package and app
+  workflows.
+- Architecture (`vignettes/articles/architecture.Rmd`): code map and
+  current limits; the canonical source is
+  [ARCHITECTURE.md](https://ramdhadage.github.io/SasTestGenerator/ARCHITECTURE.md).
+- Generation contract (`vignettes/articles/generation-contract.Rmd`):
+  requested JSON, displayed matrix, downloads, and failure behavior.
+- [Contributor
+  guidance](https://ramdhadage.github.io/SasTestGenerator/AGENTS.md),
+  change history (`NEWS.md`), and verification record
+  (`docs/verification.md`).
+
+Build the function help and local website from RStudio:
+
+``` r
+
+devtools::document()
+pkgdown::check_pkgdown()
+pkgdown::build_site(preview = FALSE)
+```
+
+Open `pkgdown-site/index.html`. Generated site files are excluded from
+Git and package builds; these local commands do not publish the site.
+
+GitHub Actions builds the website on pushes to `master` and publishes
+the rendered HTML to `gh-pages`. Pull requests build without deploying.
+You can also run the `pkgdown` workflow manually from the Actions tab on
+`master`. GitHub Pages serves the root of `gh-pages` at [the
+documentation site](https://ramdhadage.github.io/SasTestGenerator/). The
+workflow uses the repository’s `GITHUB_TOKEN`; no OpenRouter key is
+needed. CI resolves documentation dependencies through `r-lib/actions`,
+following the SubmissionSync setup; local development continues to use
+`renv.lock`.
+
+There is no committed automated test suite yet; run the offline example
+and
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+when checking the package. Live generation, browser behavior, and SAS
+execution require separate verification.

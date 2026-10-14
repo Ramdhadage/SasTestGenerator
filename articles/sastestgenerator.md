@@ -1,0 +1,171 @@
+# Getting started with sastestgenerator
+
+This proof of concept prepares prompts and drafts SAS macro validation
+tests. Start with the offline package workflow, then use live generation
+only with inputs permitted for OpenRouter and its selected model
+provider.
+
+## Restore and load
+
+From the repository root in RStudio:
+
+``` r
+
+renv::restore()
+pkgload::load_all(".")
+```
+
+The lockfile records R 4.6.0. Documentation tools are declared in
+`Suggests` and included in the explicit renv snapshot. An installed
+package can instead be loaded with
+[`library(sastestgenerator)`](https://ramdhadage.github.io/SasTestGenerator/).
+
+## Prepare a prompt without a model call
+
+This executable example writes a synthetic FRD and macro to temporary
+files. No API key or network call is needed.
+
+``` r
+
+library(sastestgenerator)
+
+frd_path <- tempfile(fileext = ".txt")
+macro_path <- tempfile(fileext = ".sas")
+writeLines(
+    "FRD-001: Set BASEFL to Y for BASELINE visits; otherwise set it to N.",
+    frd_path
+)
+writeLines(c(
+    "%macro derive_visit_flag(input=, output=);",
+    "data &output.; set &input.;",
+    "if VISIT = 'BASELINE' then BASEFL = 'Y'; else BASEFL = 'N';",
+    "run; %mend derive_visit_flag;"
+), macro_path)
+
+frd <- read_frd(frd_path)
+macro <- import_sas_macro(macro_path)
+macro$macro_names
+```
+
+    ## [1] "derive_visit_flag"
+
+``` r
+
+macro$parameters
+```
+
+    ## [1] "input"  "output"
+
+``` r
+
+result <- generate_sas_tests(frd, macro)
+cat(result$prompt)
+```
+
+    ## You are a Senior SAS Programmer and Clinical Programming Validation Expert.
+    ## 
+    ## Generate structured JSON containing test cases, sample data, SAS validation/test code,
+    ## 
+    ## and traceability for the supplied functional requirements and SAS macro.
+    ## 
+    ## Functional requirements:
+    ## 
+    ## FRD-001: Set BASEFL to Y for BASELINE visits; otherwise set it to N.
+    ## 
+    ## SAS macro:
+    ## 
+    ## %macro derive_visit_flag(input=, output=);
+    ## data &output.; set &input.;
+    ## if VISIT = 'BASELINE' then BASEFL = 'Y'; else BASEFL = 'N';
+    ## run; %mend derive_visit_flag;
+
+``` r
+
+unlink(c(frd_path, macro_path))
+```
+
+The result contains `prompt`, `requirements`, `macro`, `test_cases`, and
+`sas_code`. The last two fields are empty in offline mode. The returned
+input objects contain paths and text; deleting temporary files does not
+erase the text retained in those objects.
+
+From a source checkout, the supplied pair is `examples/simple_frd.txt`
+and `examples/simple_visit_flag.sas`. `source("example.R")` reads those
+files and checks the offline result.
+
+## Supply a generator
+
+A generator is a function receiving one prompt string. Its return value
+is returned directly, with no automatic validation or wrapper. This
+small callback demonstrates the contract without calling a model:
+
+``` r
+
+prompt_length <- generate_sas_tests(
+    frd, macro,
+    generator = function(prompt) nchar(prompt)
+)
+stopifnot(prompt_length > 0L)
+```
+
+## Request live output
+
+Add `OPENROUTER_API_KEY=your-key-here` to the project `.Renviron` and
+restart R. The following code is shown for manual use and is not
+executed when building this guide:
+
+``` r
+
+live_result <- generate_sas_tests_openrouter(
+    frd, macro,
+    model = "gpt-4o-mini",
+    temperature = 0,
+    max_tokens = 4096
+)
+live_result$parsed
+```
+
+The model string is the current code default. Check provider support
+before using it. The call sends the full FRD and SAS source outside the
+application and may incur charges. A parsed response is a draft, not
+proof that tests are correct.
+
+## Use the app
+
+``` r
+
+shiny::runApp(".")
+```
+
+1.  Paste a non-empty FRD.
+2.  Upload one `.sas` file.
+3.  Set the model, temperature, and maximum output tokens.
+4.  Select **Generate test cases** and inspect the displayed matrix.
+5.  Download `Validation_Results.zip` and review the workbook and both
+    SAS files independently before use.
+
+Input feedback highlights invalid fields; notifications report
+generation errors. Missing or malformed model output can fail
+normalization. Regenerate after changing inputs, because a previous
+result is not automatically cleared when inputs change. The app does not
+run SAS or require a recorded approval.
+
+The [generation
+contract](https://ramdhadage.github.io/SasTestGenerator/articles/generation-contract.md)
+explains the response, matrix, and download fields. The
+[architecture](https://ramdhadage.github.io/SasTestGenerator/articles/architecture.md)
+maps the implementation boundaries.
+
+## Build documentation
+
+``` r
+
+devtools::document()
+pkgdown::check_pkgdown()
+pkgdown::build_site(preview = FALSE)
+```
+
+The website is generated in `pkgdown-site/`. No deployment is performed
+by these commands. There is no committed automated test suite; the
+offline example, documentation build, package check, and browser review
+are separate checks.
