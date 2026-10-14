@@ -91,8 +91,17 @@ pkgdown::build_site(preview = FALSE)
 ```
 
 Open `pkgdown-site/index.html`. Generated site files are excluded from Git and
-package builds. The URL in `_pkgdown.yml` is the intended GitHub Pages address;
-these commands do not publish the site. There is no committed automated test
-suite yet; run the offline
+package builds; these local commands do not publish the site.
+
+GitHub Actions builds the website on pushes to `master` and publishes the
+rendered HTML to `gh-pages`. Pull requests build without deploying. You can also
+run the `pkgdown` workflow manually from the Actions tab on `master`. GitHub
+Pages serves the root of `gh-pages` at
+[the documentation site](https://ramdhadage.github.io/SasTestGenerator/).
+The workflow uses the repository's `GITHUB_TOKEN`; no OpenRouter key is needed.
+CI resolves documentation dependencies through `r-lib/actions`, following the
+SubmissionSync setup; local development continues to use `renv.lock`.
+
+There is no committed automated test suite yet; run the offline
 example and `devtools::check()` when checking the package. Live generation,
 browser behavior, and SAS execution require separate verification.
