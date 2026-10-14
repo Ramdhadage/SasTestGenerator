@@ -5,7 +5,7 @@ articles:
   articles/architecture: architecture.html
   articles/generation-contract: generation-contract.html
   sastestgenerator: sastestgenerator.html
-last_built: 2026-10-14T10:33Z
+last_built: 2026-10-14T10:47Z
 urls:
   reference: https://ramdhadage.github.io/SasTestGenerator/reference
   article: https://ramdhadage.github.io/SasTestGenerator/articles

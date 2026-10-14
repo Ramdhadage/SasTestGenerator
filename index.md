@@ -8,6 +8,10 @@ validation matrix, sample data, and SAS programs through OpenRouter.
 Generated content requires independent review. The application does not
 execute SAS, establish test coverage, or enforce an approval workflow.
 
+- [Live web
+  app](https://ti5syn-ramdhadage.shinyapps.io/sastestgenerator/)
+- [Documentation](https://ramdhadage.github.io/SasTestGenerator/)
+
 ## Get started
 
 Clone this repository and open its root in RStudio. The lockfile records
