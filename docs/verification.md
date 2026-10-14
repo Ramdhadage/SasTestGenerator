@@ -91,3 +91,28 @@ No live model requests or SAS execution were performed.
 
 The GitHub Pages URL in package/site metadata is an intended publication address.
 The site was built and checked locally; it was not committed, pushed, or deployed.
+
+## GitHub Pages deployment verified on 2026-10-14
+
+The site is live at <https://ramdhadage.github.io/SasTestGenerator/>.
+The workflow lives on `master`; generated HTML and site assets are published to
+`gh-pages`, which GitHub Pages serves from `/` with HTTPS enforced.
+
+- Source commit: `183d24bc3d9ca15b74bc0f4dcbbfea03dec28e91`.
+- [pkgdown build and branch publication](https://github.com/Ramdhadage/SasTestGenerator/actions/runs/38549103339): success.
+- [GitHub Pages deployment](https://github.com/Ramdhadage/SasTestGenerator/actions/runs/38549572483): success.
+- Local `pkgdown::check_pkgdown()` and GitHub Pages site build: passed.
+- Chrome DevTools fetched the same 13 routes listed above from the public site:
+  all returned HTTP 200 with headings and main content.
+- Desktop homepage rendering at 1440px and search navigation to `read_frd`: passed.
+- Mobile homepage, getting-started, architecture, generation-contract, and
+  OpenRouter reference rendering at 390px: passed, with no horizontal overflow.
+  The mobile menu expanded and Get started navigated to the guide.
+- The initial homepage console reported a 404 for the account-level
+  `https://ramdhadage.github.io/favicon.ico`. Article/reference console checks
+  found no errors. No custom favicon was added.
+
+CI resolves dependencies with `r-lib/actions`, following the SubmissionSync
+workflow; it does not restore `renv.lock`. No live model requests, Shiny runtime
+checks, SAS execution, or new package check were performed for this deployment.
+The earlier local-only publication statement describes the pre-deployment check.
