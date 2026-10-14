@@ -3,13 +3,12 @@
 .RData
 .Ruserdata
 /.quarto/
-plan.md
-example.R
-AGENTS.md
 .Renviron
 rsconnect/
 temp/
 .vscode/
 app_dinesh.R
-NEWS.md
 sastestgenerator.Rproj
+/pkgdown-site/
+/sastestgenerator.Rcheck/
+/sastestgenerator_*.tar.gz

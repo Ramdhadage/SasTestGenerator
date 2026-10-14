@@ -2,11 +2,25 @@
 #'
 #' @param frd An object returned by [read_frd()].
 #' @param macro An object returned by [import_sas_macro()].
-#' @param generator Optional function receiving the generated prompt and
-#'   returning a structured result. This is the extension point for `ellmer`.
-#' @return A list containing `prompt`, `requirements`, `test_cases`, and
-#'   `sas_code`. Without `generator`, the test-case fields are intentionally
-#'   empty and the result is suitable for passing to an LLM implementation.
+#' @param generator An optional function receiving one prompt string. Its return
+#'   value is passed through unchanged, without schema validation.
+#' @return Without `generator`, a list with `prompt`, `requirements`, `macro`,
+#'   an empty `test_cases` data frame, and an empty `sas_code` character vector.
+#'   With `generator`, the value returned by that function.
+#' @details The default path constructs a prompt and makes no network call.
+#'   The complete FRD text and macro source are included in the prompt. Invalid
+#'   input classes and a non-function generator raise errors.
+#' @examples
+#' frd_path <- tempfile(fileext = ".txt")
+#' macro_path <- tempfile(fileext = ".sas")
+#' writeLines("FRD-001: Set BASEFL to Y for BASELINE visits.", frd_path)
+#' writeLines("%macro derive_flag(input=, output=); %mend;", macro_path)
+#' frd <- read_frd(frd_path)
+#' macro <- import_sas_macro(macro_path)
+#' result <- generate_sas_tests(frd, macro)
+#' cat(result$prompt)
+#' generate_sas_tests(frd, macro, generator = function(prompt) nchar(prompt))
+#' unlink(c(frd_path, macro_path))
 #' @export
 generate_sas_tests <- function(frd, macro, generator = NULL) {
   if (!inherits(frd, "frd_document")) {
@@ -35,15 +49,31 @@ generate_sas_tests <- function(frd, macro, generator = NULL) {
 
 #' Generate SAS tests with OpenRouter
 #'
-#' Uses [ellmer::chat_openrouter()] and the OpenRouter model
-#' `openai/gpt-4.1-mini`. Set `OPENROUTER_API_KEY` in `.Renviron` before use.
+#' Calls [ellmer::chat_openrouter()] synchronously. Set `OPENROUTER_API_KEY`
+#' in `.Renviron` and restart R before use. The current model default is the
+#' literal string `gpt-4o-mini`; confirm provider support before calling.
 #'
 #' @param frd An object returned by [read_frd()].
 #' @param macro An object returned by [import_sas_macro()].
-#' @param model OpenRouter model identifier.
+#' @param model A non-empty OpenRouter model identifier.
 #' @param temperature Sampling temperature passed to `ellmer`.
 #' @param max_tokens Maximum number of output tokens.
-#' @return A list containing the prompt, raw response, and parsed JSON response.
+#' @return A list with `model`, `prompt`, raw response text in `response`, and
+#'   JSON decoded with `simplifyVector = FALSE` in `parsed`. Invalid JSON produces
+#'   `parsed = NULL`; decoded output is not checked against the requested schema.
+#' @details The request sends the complete FRD text and SAS source to OpenRouter
+#'   and its selected provider and may incur charges. Only use permitted content.
+#'   Provider errors propagate. The requested JSON contains `test_cases`,
+#'   `sample_data`, `sas_code`, `sas_test_code`, and `traceability`. Generated
+#'   content requires review; SAS execution and coverage verification are not
+#'   performed. This function has no application-level retries or cancellation.
+#' @examples
+#' \dontrun{
+#' frd <- read_frd("examples/simple_frd.txt")
+#' macro <- import_sas_macro("examples/simple_visit_flag.sas")
+#' live_result <- generate_sas_tests_openrouter(frd, macro)
+#' live_result$parsed
+#' }
 #' @export
 generate_sas_tests_openrouter <- function(
     frd,

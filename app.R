@@ -74,7 +74,7 @@ ui <- bslib::page_sidebar(
     uiOutput("result_status"),
     tableOutput("test_matrix"),
       downloadButton("download_results", "Download results")
-     
+
   )
 )
 

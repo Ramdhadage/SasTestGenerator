@@ -4,3 +4,10 @@ Prompt with details.md
 example.R
 README.md
 NEWS.md
+ARCHITECTURE.md
+plan.md
+docs/
+man/
+vignettes/
+_pkgdown.yml
+pkgdown-site/

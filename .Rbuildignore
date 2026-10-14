@@ -6,4 +6,22 @@
 ^\.quarto$
 ^\.Rcheck$
 ^\.Rprofile$
+^\.Renviron$
 ^Prompt with details\.md$
+^AGENTS\.md$
+^ARCHITECTURE\.md$
+^plan\.md$
+^example\.R$
+^app_dinesh\.R$
+^_pkgdown\.yml$
+^pkgdown-site$
+^docs$
+^\.vscode$
+^rsconnect$
+^temp$
+^sastestgenerator\.Rcheck$
+^sastestgenerator_.*\.tar\.gz$
+^\.rscignore$
+^app\.R$
+^example$
+^examples$

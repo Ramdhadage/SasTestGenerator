@@ -1,0 +1,8 @@
+---
+title: "Architecture and implementation limits"
+description: "The current package and Shiny flow, code map, and enforcement boundaries."
+---
+
+```{r, echo=FALSE, results='asis'}
+cat(readLines("../../ARCHITECTURE.md", warn = FALSE)[-1L], sep = "\n")
+```
