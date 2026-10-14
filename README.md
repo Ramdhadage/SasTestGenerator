@@ -1,29 +1,98 @@
 # sastestgenerator
 
-Minimal proof-of-concept R package for preparing SAS macro validation tests from
-functional requirements documents (FRDs).
+An R package and Shiny proof of concept for drafting SAS macro test cases from
+functional requirements documents (FRDs) and SAS source. Statistical programmers
+can prepare a prompt offline or request a validation matrix, sample data, and SAS
+programs through OpenRouter.
 
-## Current scope
+Generated content requires independent review. The application does not execute
+SAS, establish test coverage, or enforce an approval workflow.
 
-The initial package can:
+## Get started
 
-1. Read text-based FRDs.
-2. Import SAS macro source and extract macro names and parameters.
-3. Build a structured prompt for an LLM.
-4. Accept an optional generator function for an `ellmer` integration.
+Clone this repository and open its root in RStudio. The lockfile records R 4.6.0.
+Restore the runtime and documentation dependencies, then load the package:
 
 ```r
-frd <- read_frd("requirements.txt")
-macro <- import_sas_macro("derive_flag.sas")
-
-result <- generate_sas_tests(frd, macro)
-cat(result$prompt)
-
-# Set OPENROUTER_API_KEY in .Renviron before calling the live model.
-live_result <- generate_sas_tests_openrouter(frd, macro)
-live_result$parsed
+renv::restore()
+pkgload::load_all(".")
 ```
 
-PDF/DOCX parsing and generated SAS execution are intentionally outside this
-first POC boundary. The OpenRouter API key is read by `ellmer` from the
-`OPENROUTER_API_KEY` environment variable and is never stored by the package.
+Run the supplied synthetic example without an API key or network call:
+
+```r
+frd <- read_frd("examples/simple_frd.txt")
+macro <- import_sas_macro("examples/simple_visit_flag.sas")
+result <- generate_sas_tests(frd, macro)
+cat(result$prompt)
+```
+
+`generate_sas_tests()` prepares a prompt; its default test-case and SAS-code
+fields are empty. `source("example.R")` runs this workflow with small assertions.
+
+## Use the Shiny app
+
+For live generation, add your key to the project `.Renviron`, then restart R:
+
+```text
+OPENROUTER_API_KEY=your-key-here
+```
+
+```r
+shiny::runApp(".")
+```
+
+Paste the FRD, upload one `.sas` file, check the generation settings, and select
+**Generate test cases**. The app displays six matrix columns and downloads
+`Validation_Results.zip` containing:
+
+- `Validation_Test_Matrix.xlsx`, with `Validation_Matrix` and `Sample_Data` sheets;
+- `sas_code.sas`;
+- `sas_test_code.sas`.
+
+The app's model setting and package default are currently `gpt-4o-mini`, with
+temperature `0` and a maximum of `4096` output tokens. Confirm that your selected
+model identifier is accepted by OpenRouter. Live requests may incur provider
+charges. The app can open without a key; generation requires one.
+
+## Data and implementation boundaries
+
+Live generation sends the complete FRD text and SAS source to OpenRouter and its
+selected model provider. Use public or synthetic examples and only other content
+approved for those services. The app does not classify, redact, or de-identify
+inputs. Keep credentials and confidential content out of source control.
+
+The package reads `.txt`, `.md`, `.markdown`, and `.sas` FRDs. The UI accepts
+pasted FRD text. PDF/DOCX parsing and SAS execution are outside the current scope.
+Macro metadata uses regular expressions rather than a complete SAS parser.
+Successful JSON parsing and matrix display do not establish SAS correctness or
+requirement coverage. Exports do not retain the original inputs, prompt, model
+settings, or raw response as a reproducibility record.
+
+## Documentation and development
+
+The website navigation provides **Get started**, **Reference**, **Articles**, and
+**Changelog**. The corresponding sources in this checkout are:
+
+- Getting started (`vignettes/sastestgenerator.Rmd`): package and app workflows.
+- Architecture (`vignettes/articles/architecture.Rmd`): code map and current limits;
+  the canonical source is [ARCHITECTURE.md](ARCHITECTURE.md).
+- Generation contract (`vignettes/articles/generation-contract.Rmd`): requested
+  JSON, displayed matrix, downloads, and failure behavior.
+- [Contributor guidance](AGENTS.md), change history (`NEWS.md`), and
+  verification record (`docs/verification.md`).
+
+Build the function help and local website from RStudio:
+
+```r
+devtools::document()
+pkgdown::check_pkgdown()
+pkgdown::build_site(preview = FALSE)
+```
+
+Open `pkgdown-site/index.html`. Generated site files are excluded from Git and
+package builds. The URL in `_pkgdown.yml` is the intended GitHub Pages address;
+these commands do not publish the site. There is no committed automated test
+suite yet; run the offline
+example and `devtools::check()` when checking the package. Live generation,
+browser behavior, and SAS execution require separate verification.

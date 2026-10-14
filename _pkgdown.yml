@@ -1,0 +1,32 @@
+# Intended publication address; building this site does not deploy it.
+url: https://ramdhadage.github.io/SasTestGenerator/
+destination: pkgdown-site
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1f5a85"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+articles:
+  - title: Getting started
+    contents:
+      - sastestgenerator
+  - title: Implementation guides
+    contents:
+      - articles/architecture
+      - articles/generation-contract
+
+reference:
+  - title: Read inputs
+    contents:
+      - read_frd
+      - import_sas_macro
+  - title: Prepare and generate tests
+    contents:
+      - generate_sas_tests
+      - generate_sas_tests_openrouter

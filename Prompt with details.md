@@ -1,5 +1,15 @@
 *I would like to create a R package which allow the importing the sas macro code and functional requirements documents and based on frd andacro.code block it should generate the test cases and along with sas code with sample data. All should happen in R only. THis should be simple R package that can read SAS macro code and functional requirements documents (FRD), and then generate test cases along with SAS code and sample data. Below is a simple outline of how you can structure your R package to achieve this functionality
 
+# Historical design draft
+
+This document retains the original proposal and illustrative prompts. Its
+PDF/DOCX ingestion, approval flow, prompt/model versioning, deterministic code
+generation, and synthesis-engine descriptions are aspirations, not implemented
+guarantees. Read [ARCHITECTURE.md](ARCHITECTURE.md) for the current implementation
+and the generation contract in `vignettes/articles/generation-contract.Rmd` for
+actual inputs, outputs, and limits. The original constraints below are retained
+as historical context, not current contributor instructions.
+
 ## Feature architecture:
 
 ```mermaid
@@ -201,7 +211,7 @@ run;
 ```
 ## constraints
 1. This is poc with less efforts, no test cases please and with minimum code.
-2. Use skills like [cli](C:\\Users\\admin\\.codex\\skills\\cli\\SKILL.md), [tidy-r](C:\\Users\\admin\\.agents\\skills\\tidy-r\\SKILL.md),  [r-package-development](C:\\Users\\admin\\.codex\\skills\\r-package-development\\SKILL.md) and functional programming and good coding practices. 
+2. Use skills like `cli`, `tidy-r`,  `r-package-development` and functional programming and good coding practices.
 3. The R package should be able to read and parse SAS macro code and functional requirements documents
 4. Just focus on generating test cases and SAS code with sample data based on the FRD and SAS macro code. 
 5. The package should be simple and user-friendly, allowing users to easily upload their FRD and SAS macro code, and receive the generated test cases and SAS code with sample data in a structured format.
