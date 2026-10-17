@@ -12,6 +12,14 @@ execute SAS, establish test coverage, or enforce an approval workflow.
   app](https://ti5syn-ramdhadage.shinyapps.io/sastestgenerator/)
 - [Documentation](https://ramdhadage.github.io/SasTestGenerator/)
 
+## Video demo
+
+[![Watch the sastestgenerator demo on
+YouTube](https://img.youtube.com/vi/nCr_8yYuaGw/hqdefault.jpg)](https://www.youtube.com/watch?v=nCr_8yYuaGw)
+
+[![Watch on
+YouTube](https://img.shields.io/badge/Watch_on_YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=nCr_8yYuaGw)
+
 ## Get started
 
 Clone this repository and open its root in RStudio. The lockfile records
